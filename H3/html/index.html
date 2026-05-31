@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H3 IoT Gateway - 物联网网关</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>🌐 H3 物联网网关</h1>
+            <span class="subtitle">阿里云IoT平台接入</span>
+        </div>
+        <div class="header-right">
+            <div class="status-indicator">
+                <span class="status-dot" id="mqtt-status"></span>
+                <span id="mqtt-status-text">连接中...</span>
+            </div>
+            <div class="update-time">
+                <span>最后更新:</span>
+                <span id="last-update">--</span>
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#dashboard" class="active">📊 实时监控</a></li>
+            <li><a href="#devices">📱 设备管理</a></li>
+            <li><a href="#history">📈 历史统计</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section id="dashboard" class="active">
+            <h2>📊 实时监控面板</h2>
+            
+            <div class="overview-cards">
+                <div class="overview-card">
+                    <div class="overview-icon">📱</div>
+                    <div class="overview-info">
+                        <span class="overview-count" id="device-count">0</span>
+                        <span class="overview-label">已发现设备</span>
+                    </div>
+                </div>
+                <div class="overview-card online">
+                    <div class="overview-icon">🟢</div>
+                    <div class="overview-info">
+                        <span class="overview-count" id="online-count">0</span>
+                        <span class="overview-label">在线设备</span>
+                    </div>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-icon">📥</div>
+                    <div class="overview-info">
+                        <span class="overview-count" id="data-count">0</span>
+                        <span class="overview-label">今日数据条数</span>
+                    </div>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-icon">⏱️</div>
+                    <div class="overview-info">
+                        <span class="overview-count" id="uptime">0</span>
+                        <span class="overview-label">运行时长(h)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="recent-data">
+                    <h3>📋 最新数据</h3>
+                    <div id="recent-data-list">
+                        <div class="data-item loading">等待数据...</div>
+                    </div>
+                </div>
+                
+                <div class="live-chart">
+                    <h3>📈 实时趋势</h3>
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <select id="chart-device" onchange="updateChart()">
+                                <option value="all">全部设备</option>
+                            </select>
+                            <select id="chart-type" onchange="updateChart()">
+                                <option value="temperature">温度</option>
+                                <option value="humidity">湿度</option>
+                            </select>
+                        </div>
+                        <canvas id="data-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="devices">
+            <h2>📱 设备管理</h2>
+            
+            <div class="device-filters">
+                <select id="device-filter" onchange="filterDevices()">
+                    <option value="all">全部设备</option>
+                    <option value="online">在线设备</option>
+                    <option value="offline">离线设备</option>
+                </select>
+                <button onclick="refreshDevices()">🔄 刷新</button>
+            </div>
+            
+            <div id="device-grid">
+                <div class="device-card loading">加载中...</div>
+            </div>
+        </section>
+        
+        <section id="history">
+            <h2>📈 历史统计</h2>
+            
+            <div class="history-filters">
+                <select id="history-device" onchange="loadHistory()">
+                    <option value="all">全部设备</option>
+                </select>
+                <select id="history-period" onchange="loadHistory()">
+                    <option value="1h">最近1小时</option>
+                    <option value="6h">最近6小时</option>
+                    <option value="24h" selected>最近24小时</option>
+                    <option value="7d">最近7天</option>
+                </select>
+                <button onclick="loadHistory()">🔄 查询</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <h4>🌡️ 温度统计</h4>
+                    <div class="stats-content">
+                        <div class="stat-item">
+                            <span class="stat-label">最高温度</span>
+                            <span class="stat-value" id="temp-max">--</span>
+                            <span class="stat-unit">°C</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">最低温度</span>
+                            <span class="stat-value" id="temp-min">--</span>
+                            <span class="stat-unit">°C</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">平均温度</span>
+                            <span class="stat-value" id="temp-avg">--</span>
+                            <span class="stat-unit">°C</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <h4>💧 湿度统计</h4>
+                    <div class="stats-content">
+                        <div class="stat-item">
+                            <span class="stat-label">最高湿度</span>
+                            <span class="stat-value" id="hum-max">--</span>
+                            <span class="stat-unit">%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">最低湿度</span>
+                            <span class="stat-value" id="hum-min">--</span>
+                            <span class="stat-unit">%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">平均湿度</span>
+                            <span class="stat-value" id="hum-avg">--</span>
+                            <span class="stat-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="history-table-container">
+                <h4>📋 历史数据记录</h4>
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>设备名称</th>
+                            <th>温度(°C)</th>
+                            <th>湿度(%)</th>
+                            <th>数据来源</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <tr><td colspan="5" class="loading">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>H3 IoT Gateway v2.0 | 阿里云IoT平台集成</p>
+    </footer>
+    
+    <script src="main.js"></script>
+</body>
+</html>

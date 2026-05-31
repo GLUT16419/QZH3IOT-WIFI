@@ -1,0 +1,12 @@
+[Unit]
+Description=H3 IoT Gateway Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/root/H3/start_all.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

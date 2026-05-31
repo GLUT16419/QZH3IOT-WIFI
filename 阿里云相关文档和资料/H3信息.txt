@@ -1,0 +1,7 @@
+{
+  "ProductKey": "YOUR_PRODUCT_KEY",
+  "DeviceName": "YOUR_DEVICE_NAME",
+  "DeviceSecret": "YOUR_DEVICE_SECRET"
+}
+
+{"clientId":"YOUR_PRODUCT_KEY.YOUR_DEVICE_NAME|securemode=2,signmethod=hmacsha256,timestamp=YOUR_TIMESTAMP|","username":"YOUR_DEVICE_NAME&YOUR_PRODUCT_KEY","mqttHostUrl":"YOUR_MQTT_HOST","passwd":"YOUR_MQTT_PASSWORD","port":1883}
